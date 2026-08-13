@@ -1,13 +1,45 @@
 {
   "name": "missionary-leadership-dashboard",
+  "productName": "Mission Insights",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Mission Insights Executive Dashboard",
+  "author": "krismlds744",
   "type": "module",
+  "main": "electron/main.mjs",
   "scripts": {
     "dev": "vite --port 5177",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5177 && electron .\"",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "electron:build": "npm run build && electron-builder",
+    "preview": "vite preview",
+    "lint": "eslint ."
+  },
+  "build": {
+    "appId": "com.missioninsights.dashboard",
+    "productName": "Mission Insights",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -24,12 +56,17 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "concurrently": "^10.0.4",
+    "cross-env": "^10.1.0",
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^10.8.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.7.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.65.0",
-    "vite": "^8.2.0"
+    "vite": "^8.2.0",
+    "wait-on": "^9.1.0"
   }
 }
