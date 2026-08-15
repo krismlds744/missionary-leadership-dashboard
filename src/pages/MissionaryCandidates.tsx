@@ -1,84 +1,61 @@
-import { useMemo, useState } from 'react'
-import MetricCard from '../components/dashboard/MetricCard'
-import { GraduationCap, HeartPulse, ShieldCheck, Stethoscope, Users, Landmark } from 'lucide-react'
-import ExecutiveHeader from '../components/missionary-candidates/ExecutiveHeader'
-import FilterToolbar from '../components/missionary-candidates/FilterToolbar'
-import CandidateTable from '../components/missionary-candidates/CandidateTable'
-import CandidateDrawer from '../components/missionary-candidates/CandidateDrawer'
-import CandidateTimeline from '../components/missionary-candidates/CandidateTimeline'
-import PreparationChecklist from '../components/missionary-candidates/PreparationChecklist'
-import DocumentStatus from '../components/missionary-candidates/DocumentStatus'
-import ProgressTracker from '../components/missionary-candidates/ProgressTracker'
-import DeadlinePanel from '../components/missionary-candidates/DeadlinePanel'
-import ExecutiveInsights from '../components/missionary-candidates/ExecutiveInsights'
+import { useMemo, useState, type ReactNode } from 'react'
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { ArrowUpDown, BriefcaseBusiness, CheckCircle2, ClipboardCheck, FileSearch, MapPin, Search, ShieldCheck, UsersRound } from 'lucide-react'
 import { missionaryCandidatesData } from '../data/missionaryCandidates'
-import type { MissionaryCandidate } from '../types/missionaryCandidates'
 
-const iconMap = {
-  candidates: Users,
-  ready: ShieldCheck,
-  interviews: GraduationCap,
-  medical: HeartPulse,
-  dental: Stethoscope,
-  calls: Landmark,
+type SortKey = 'fullName' | 'ward' | 'gender' | 'age' | 'missionType' | 'status' | 'stage' | 'recommendationStarted' | 'daysInStage'
+type SortDirection = 'asc' | 'desc'
+
+const icons = [ClipboardCheck, ShieldCheck, BriefcaseBusiness, UsersRound, CheckCircle2, FileSearch]
+const tone: Record<string, string> = { sky: '#38bdf8', amber: '#fbbf24', violet: '#c084fc', cyan: '#22d3ee', emerald: '#34d399' }
+
+function Panel({ eyebrow, title, children }: { eyebrow: string; title: string; children: ReactNode }) {
+  return <section className="rounded-[26px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_24px_70px_rgba(2,8,23,0.22)] backdrop-blur-xl sm:p-6"><div className="mb-5"><p className="text-[0.66rem] uppercase tracking-[0.24em] text-slate-500">{eyebrow}</p><h2 className="mt-2 text-xl font-semibold text-white">{title}</h2></div>{children}</section>
 }
 
+function NoRecords({ children }: { children: ReactNode }) { return <div className="flex min-h-44 items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.025] px-6 text-center text-sm leading-6 text-slate-400">{children}</div> }
+
 export default function MissionaryCandidates() {
-  const [selectedCandidate, setSelectedCandidate] = useState<MissionaryCandidate | null>(null)
+  const [selectedStage, setSelectedStage] = useState<string>(missionaryCandidatesData.pipeline[0].label)
+  const [search, setSearch] = useState('')
+  const [ward, setWard] = useState('All Wards')
+  const [gender, setGender] = useState('All Genders')
+  const [missionType, setMissionType] = useState('All Types')
+  const [status, setStatus] = useState('All Statuses')
+  const [sortKey, setSortKey] = useState<SortKey>('fullName')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [returnedSearch, setReturnedSearch] = useState('')
+  const [releaseYear, setReleaseYear] = useState('All Years')
 
-  const cards = useMemo(
-    () =>
-      missionaryCandidatesData.metrics.map((metric) => ({
-        ...metric,
-        icon: iconMap[metric.icon],
-      })),
-    [],
-  )
+  const candidates = useMemo(() => missionaryCandidatesData.candidateRecords.filter((candidate) =>
+    (!search || candidate.fullName.toLowerCase().includes(search.toLowerCase())) &&
+    (ward === 'All Wards' || candidate.ward === ward || candidate.ward.replace(' Ward', '') === ward) &&
+    (gender === 'All Genders' || candidate.gender === gender) &&
+    (missionType === 'All Types' || candidate.missionType === missionType) &&
+    (status === 'All Statuses' || candidate.status === status),
+  ).sort((left, right) => String(left[sortKey] ?? '').localeCompare(String(right[sortKey] ?? ''), undefined, { numeric: true }) * (sortDirection === 'asc' ? 1 : -1)), [gender, missionType, search, sortDirection, sortKey, status, ward])
 
-  const overallProgress = useMemo(() => {
-    const { length } = missionaryCandidatesData.candidates
+  const toggleSort = (key: SortKey) => { if (key === sortKey) setSortDirection((current) => current === 'asc' ? 'desc' : 'asc'); else { setSortKey(key); setSortDirection('asc') } }
+  const wards = ['All Wards', ...missionaryCandidatesData.candidatesByWard.map((item) => item.ward), 'Fairview Ward', 'Don Antonio Ward']
+  const selected = missionaryCandidatesData.pipeline.find((stage) => stage.label === selectedStage) ?? missionaryCandidatesData.pipeline[0]
 
-    if (length === 0) {
-      return 0
-    }
+  return <div className="space-y-7 pb-10">
+    <header className="rounded-[30px] border border-white/10 bg-slate-950/60 p-6 shadow-[0_30px_80px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-8"><p className="text-[0.68rem] uppercase tracking-[0.28em] text-slate-500">Stake missionary leadership</p><h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Missionary Candidates</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">Monitor recommendation progress, mission assignments, field service, and returned missionaries from one executive workspace.</p></header>
 
-    const average = missionaryCandidatesData.candidates.reduce((total, candidate) => total + candidate.progress, 0)
-    return Math.round(average / length)
-  }, [])
+    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{missionaryCandidatesData.kpis.map((metric, index) => { const Icon = icons[index]; return <article key={metric.title} className="rounded-[22px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_18px_50px_rgba(2,8,23,0.2)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/20"><div className="flex items-start justify-between gap-4"><div><p className="text-[0.65rem] uppercase tracking-[0.18em] text-slate-400">{metric.title}</p><p className="mt-3 text-3xl font-semibold text-white">{metric.value}</p></div><div className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-sky-200"><Icon className="h-4 w-4" /></div></div><p className="mt-3 text-sm leading-5 text-slate-400">{metric.description}</p></article> })}</section>
 
-  return (
-    <div className="space-y-8">
-      <ExecutiveHeader
-        title="Missionary Candidates"
-        description="Monitor the full missionary preparation process from first interview through mission call, travel documentation, and departure readiness."
-      />
+    <Panel eyebrow="Missionary pipeline" title="Recommendation To Mission Field"><div className="grid gap-3 lg:grid-cols-5">{missionaryCandidatesData.pipeline.map((stage) => <button key={stage.label} type="button" onClick={() => setSelectedStage(stage.label)} className={`relative overflow-hidden rounded-2xl border p-4 text-left transition ${selectedStage === stage.label ? 'border-white/30 bg-white/[0.09]' : 'border-white/10 bg-white/[0.025] hover:bg-white/[0.06]'}`}><span className="absolute left-0 top-0 h-1 w-full" style={{ backgroundColor: tone[stage.tone] }} /><p className="text-3xl font-semibold text-white">{stage.value}</p><p className="mt-2 text-xs font-medium leading-5 text-slate-300">{stage.label}</p></button>)}</div><p className="mt-4 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-sm text-slate-300"><span className="font-semibold text-white">{selected.label}:</span> {selected.value} official records in this stage.</p></Panel>
 
-      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {cards.map((card) => (
-          <MetricCard key={card.title} title={card.title} value={card.value} change={card.change} icon={card.icon} />
-        ))}
-      </section>
+    <section className="grid gap-6 xl:grid-cols-2"><Panel eyebrow="Candidate distribution" title="Candidates By Ward"><div className="h-80"><ResponsiveContainer width="100%" height="100%"><BarChart data={missionaryCandidatesData.candidatesByWard} layout="vertical" margin={{ top: 4, right: 18, left: 28 }}><CartesianGrid stroke="rgba(148,163,184,0.1)" horizontal={false} /><XAxis type="number" allowDecimals={false} stroke="#94a3b8" tickLine={false} axisLine={false} /><YAxis dataKey="ward" type="category" width={110} stroke="#cbd5e1" tickLine={false} axisLine={false} /><Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(148,163,184,0.2)', borderRadius: '12px' }} /><Bar dataKey="value" radius={[0, 7, 7, 0]}>{missionaryCandidatesData.candidatesByWard.map((item, index) => <Cell key={item.ward} fill={index === 0 ? '#38bdf8' : '#4f8fc8'} />)}</Bar></BarChart></ResponsiveContainer></div></Panel><Panel eyebrow="Current field service" title="Serving Missionaries By Ward"><NoRecords>The official total is 22 currently serving missionaries. Ward-level serving distribution has not been supplied.</NoRecords></Panel></section>
 
-      <FilterToolbar filters={missionaryCandidatesData.filters} />
+    <Panel eyebrow="Active candidate table" title="Recommendation Records"><div className="mb-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5"><label className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by name" className="w-full rounded-xl border border-white/10 bg-slate-900 px-9 py-2.5 text-sm text-white outline-none placeholder:text-slate-600" /></label>{[[ward, setWard, wards], [gender, setGender, ['All Genders', 'Female', 'Male', 'Not reported']], [missionType, setMissionType, ['All Types', 'Proselyting', 'Service', 'Not reported']], [status, setStatus, ['All Statuses', 'Completing Forms', 'Ready for Stake President Action', 'Mission Call Accepted']]].map(([value, setter, options], index) => <select key={index} value={value as string} onChange={(event) => (setter as (value: string) => void)(event.target.value)} className="rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white">{(options as string[]).map((option) => <option key={option}>{option}</option>)}</select>)}</div><div className="overflow-x-auto rounded-2xl border border-white/10"><table className="min-w-full text-left"><thead className="bg-white/[0.04]"><tr>{[['Full Name', 'fullName'], ['Ward', 'ward'], ['Gender', 'gender'], ['Age', 'age'], ['Mission Type', 'missionType'], ['Current Status', 'status'], ['Current Stage', 'stage'], ['Started Recommendation', 'recommendationStarted'], ['Days In Stage', 'daysInStage']].map(([label, key]) => <th key={key} className="px-4 py-3 text-left text-[0.62rem] uppercase tracking-[0.16em] text-slate-400"><button type="button" onClick={() => toggleSort(key as SortKey)} className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-white">{label}<ArrowUpDown className={`h-3 w-3 ${sortKey === key ? 'text-sky-300' : 'opacity-60'}`} /></button></th>)}</tr></thead><tbody>{candidates.length ? candidates.map((candidate) => <tr key={candidate.id} className="border-t border-white/10 transition hover:bg-white/[0.035]"><td className="px-4 py-4 text-sm font-medium text-white">{candidate.fullName}</td><td className="px-4 py-4 text-sm text-slate-300">{candidate.ward}</td><td className="px-4 py-4 text-sm text-slate-300">{candidate.gender}</td><td className="px-4 py-4 text-sm text-slate-300">{candidate.age ?? 'Not reported'}</td><td className="px-4 py-4 text-sm text-slate-300">{candidate.missionType}</td><td className="px-4 py-4"><span className="inline-flex whitespace-nowrap rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-[0.62rem] text-emerald-200">{candidate.status}</span></td><td className="px-4 py-4 text-sm text-slate-300">{candidate.stage}</td><td className="px-4 py-4 text-sm text-slate-300">{candidate.recommendationStarted ?? 'Not reported'}</td><td className="px-4 py-4 text-sm text-slate-300">{candidate.daysInStage ?? 'Not reported'}</td></tr>) : <tr><td colSpan={9} className="px-4 py-12 text-center text-sm text-slate-400">No official candidate records match these filters.</td></tr>}</tbody></table></div><p className="mt-3 text-xs text-slate-500">Individual records are shown only when supplied. The official active-candidate total is 22.</p></Panel>
 
-      <CandidateTable candidates={missionaryCandidatesData.candidates} onSelectCandidate={setSelectedCandidate} />
+    <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]"><Panel eyebrow="Currently serving" title="Mission Field Summary"><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4"><p className="text-xs uppercase tracking-[0.18em] text-emerald-200">Currently Serving</p><p className="mt-2 text-3xl font-semibold text-white">22</p></div>{['Young Elders', 'Young Sisters', 'Service Missionaries'].map((label) => <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.025] p-4"><p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p><p className="mt-2 text-lg font-semibold text-slate-300">Not reported</p></div>)}</div></Panel><Panel eyebrow="Mission type distribution" title="Serving Mission Types"><NoRecords>Young Elder, Young Sister, Service Missionary, and Senior Missionary counts have not been supplied in the official data.</NoRecords></Panel></section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <CandidateTimeline items={missionaryCandidatesData.timeline} />
-        <ProgressTracker value={overallProgress} />
-      </section>
+    <section className="grid gap-6 xl:grid-cols-2"><Panel eyebrow="Recent mission assignment" title="Leaving Soon"><article className="rounded-2xl border border-sky-400/25 bg-sky-400/[0.07] p-5"><div className="flex items-start justify-between gap-4"><div><p className="text-lg font-semibold text-white">Ashlyn Blair Macalam Dongito</p><p className="mt-1 flex items-center gap-1.5 text-sm text-sky-200"><MapPin className="h-3.5 w-3.5" />Fairview Ward</p></div><span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-[0.62rem] text-emerald-200">Mission Call Accepted</span></div><dl className="mt-5 grid gap-4 sm:grid-cols-2"><div><dt className="text-xs uppercase tracking-[0.16em] text-slate-500">Mission</dt><dd className="mt-1 text-sm text-slate-200">England Bristol Mission</dd></div><div><dt className="text-xs uppercase tracking-[0.16em] text-slate-500">Mission Start</dt><dd className="mt-1 text-sm text-slate-200">September 17, 2026</dd></div></dl></article></Panel><Panel eyebrow="Recently entered field" title="Mission Field Arrival"><article className="rounded-2xl border border-emerald-400/25 bg-emerald-400/[0.06] p-5"><p className="text-lg font-semibold text-white">Xyanne Mejia Abat</p><p className="mt-1 flex items-center gap-1.5 text-sm text-emerald-200"><MapPin className="h-3.5 w-3.5" />Don Antonio Ward</p><dl className="mt-5 grid gap-4 sm:grid-cols-2"><div><dt className="text-xs uppercase tracking-[0.16em] text-slate-500">Mission</dt><dd className="mt-1 text-sm text-slate-200">Madagascar Antananarivo North Mission</dd></div><div><dt className="text-xs uppercase tracking-[0.16em] text-slate-500">Mission Start</dt><dd className="mt-1 text-sm text-slate-200">August 6, 2026</dd></div><div><dt className="text-xs uppercase tracking-[0.16em] text-slate-500">Expected Release</dt><dd className="mt-1 text-sm text-slate-200">February 2, 2028</dd></div></dl></article></Panel></section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-        <PreparationChecklist items={missionaryCandidatesData.checklist} />
-        <DeadlinePanel deadlines={missionaryCandidatesData.deadlines} />
-      </section>
+    <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]"><Panel eyebrow="Returned missionaries" title="45 Honorably Released"><div className="mb-4 flex flex-col gap-3 sm:flex-row"><label className="relative flex-1"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><input value={returnedSearch} onChange={(event) => setReturnedSearch(event.target.value)} placeholder="Search returned missionaries" className="w-full rounded-xl border border-white/10 bg-slate-900 px-9 py-2.5 text-sm text-white placeholder:text-slate-600" /></label><select value={releaseYear} onChange={(event) => setReleaseYear(event.target.value)} className="rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white"><option>All Years</option></select></div><NoRecords>The official report confirms 45 returned missionaries, but individual returned-missionary records and release years have not been supplied.</NoRecords></Panel><Panel eyebrow="Executive insights" title="Leadership Focus"><div className="space-y-3">{missionaryCandidatesData.insights.map((insight, index) => <article key={insight} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-400/15 text-xs font-semibold text-sky-200">{index + 1}</span><p className="text-sm leading-6 text-slate-300">{insight}</p></article>)}</div></Panel></section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <DocumentStatus documents={missionaryCandidatesData.documentStatus} />
-        <ExecutiveInsights insights={missionaryCandidatesData.insights} />
-      </section>
-
-      {selectedCandidate && <CandidateDrawer candidate={selectedCandidate} onClose={() => setSelectedCandidate(null)} />}
-    </div>
-  )
+    <Panel eyebrow="Mission timeline" title="Candidate Journey"><div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">{['Recommendation Started', 'Bishop Interview', 'Stake President Interview', 'Mission Assignment', 'Entered MTC', 'Entered Mission Field'].map((step, index) => <div key={step} className="rounded-xl border border-white/10 bg-white/[0.025] p-3"><span className="text-xs font-semibold text-sky-200">{String(index + 1).padStart(2, '0')}</span><p className="mt-3 text-sm font-medium leading-5 text-white">{step}</p></div>)}</div><p className="mt-4 text-sm text-slate-400">Timeline and readiness architecture are ready for future official records: clearances, visa, documents, training, language preparation, checklist completion, alerts, and MTC or departure countdowns.</p></Panel>
+  </div>
 }

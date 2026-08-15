@@ -23,13 +23,13 @@ export const convertsData: ConvertsData = {
     { month: 'Q2 2026', baptisms: 114, confirmations: 114, templeReadiness: 421 },
   ],
   wardComparison: [
-    { ward: 'Batasan 1st', investigators: 0, baptisms: 22, confirmations: 0, templeReady: 47, retention: 0, status: 'Stable' },
-    { ward: 'Batasan 2nd', investigators: 0, baptisms: 13, confirmations: 0, templeReady: 58, retention: 0, status: 'Stable' },
-    { ward: 'Bagong Silangan', investigators: 0, baptisms: 14, confirmations: 0, templeReady: 44, retention: 0, status: 'Stable' },
-    { ward: 'Don Antonio', investigators: 0, baptisms: 6, confirmations: 0, templeReady: 63, retention: 0, status: 'Strong' },
-    { ward: 'Fairview', investigators: 0, baptisms: 31, confirmations: 0, templeReady: 64, retention: 0, status: 'Stable' },
-    { ward: 'Kalayaan', investigators: 0, baptisms: 13, confirmations: 0, templeReady: 88, retention: 0, status: 'Strong' },
-    { ward: 'Mapayapa', investigators: 0, baptisms: 15, confirmations: 0, templeReady: 57, retention: 0, status: 'Stable' },
+    { ward: 'Batasan 1st', investigators: 0, baptisms: 22, confirmations: 22, templeReady: 0, calling: 1, retention: 68.2, status: 'Stable' },
+    { ward: 'Batasan 2nd', investigators: 0, baptisms: 13, confirmations: 13, templeReady: 1, calling: 0, retention: 61.5, status: 'Stable' },
+    { ward: 'Bagong Silangan', investigators: 0, baptisms: 14, confirmations: 14, templeReady: 1, calling: 1, retention: 78.6, status: 'Stable' },
+    { ward: 'Don Antonio', investigators: 0, baptisms: 6, confirmations: 6, templeReady: 1, calling: 4, retention: 83.3, status: 'Strong' },
+    { ward: 'Fairview', investigators: 0, baptisms: 31, confirmations: 31, templeReady: 12, calling: 8, retention: 74.2, status: 'Stable' },
+    { ward: 'Kalayaan', investigators: 0, baptisms: 13, confirmations: 13, templeReady: 0, calling: 3, retention: 76.9, status: 'Strong' },
+    { ward: 'Mapayapa', investigators: 0, baptisms: 15, confirmations: 15, templeReady: 1, calling: 3, retention: 73.3, status: 'Stable' },
   ],
   journey: [
     {

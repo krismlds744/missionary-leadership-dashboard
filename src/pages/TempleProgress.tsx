@@ -2,41 +2,41 @@ import { useMemo, useState } from 'react'
 import {
   ArrowUpRight,
   CalendarRange,
-  Crown,
   Download,
   Filter,
   HeartHandshake,
-  ScrollText,
-  ShieldCheck,
   Users,
 } from 'lucide-react'
 import MetricCard from '../components/dashboard/MetricCard'
 import ExecutiveInsights from '../components/temple-progress/ExecutiveInsights'
 import FilterToolbar from '../components/temple-progress/FilterToolbar'
-import HeatMap from '../components/temple-progress/HeatMap'
-import OrdinanceTimeline from '../components/temple-progress/OrdinanceTimeline'
-import PreparationPipeline from '../components/temple-progress/PreparationPipeline'
 import TempleFunnel from '../components/temple-progress/TempleFunnel'
 import TempleTrendChart from '../components/temple-progress/TempleTrendChart'
 import WardTempleTable from '../components/temple-progress/WardTempleTable'
+import { stakeOverviewData } from '../data/stakeOverview'
 import { templeProgressData } from '../data/templeProgress'
 import type { TempleMetricKey } from '../types/pageData'
 
-const summaryIcons = [HeartHandshake, Users, ScrollText, ShieldCheck, Crown, ArrowUpRight] as const
+const summaryIcons = [HeartHandshake, Users, ArrowUpRight] as const
 
 export default function TempleProgress() {
   const [activeMetric, setActiveMetric] = useState<TempleMetricKey>('templeReady')
+  const [filters, setFilters] = useState({ ward: 'All Wards', dateRange: 'Quarter 2 2026', ageGroup: 'All Ages' })
+
+  const filteredRows = useMemo(() => {
+    if (filters.ward === 'All Wards') return templeProgressData.wardTable
+    return templeProgressData.wardTable.filter((row) => row.ward === filters.ward)
+  }, [filters.ward])
+
+  const totalActiveMembers = stakeOverviewData.summary.activeMembers
+  const totalTempleRecommends = filteredRows.reduce((sum, row) => sum + row.recommendHolders, 0)
 
   const summaryCards = useMemo(
     () => [
-      { label: 'Temple Ready Members', value: '421', change: 'Official PDF total', icon: summaryIcons[0] },
-      { label: 'Members Preparing', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[1] },
-      { label: 'Recommend Interviews Scheduled', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[2] },
-      { label: 'Recommend Holders', value: '421', change: 'Official PDF total', icon: summaryIcons[3] },
-      { label: 'Endowments This Year', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[4] },
-      { label: 'Sealings This Year', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[5] },
+      { label: 'Active Members', value: totalActiveMembers.toLocaleString(), change: 'Stake active members', icon: summaryIcons[0] },
+      { label: 'Members with Active Temple Recommend', value: totalTempleRecommends.toLocaleString(), change: `${((totalTempleRecommends / Math.max(totalActiveMembers, 1)) * 100).toFixed(1)}% of active members`, icon: summaryIcons[1] },
     ],
-    [],
+    [totalActiveMembers, totalTempleRecommends],
   )
 
   const metricOptions: Array<{ key: TempleMetricKey; label: string }> = [
@@ -46,6 +46,24 @@ export default function TempleProgress() {
     { key: 'endowments', label: 'Endowments' },
     { key: 'sealings', label: 'Sealings' },
   ]
+
+  const insights = useMemo(() => {
+    if (filteredRows.length === 0) {
+      return [{ title: 'No ward selected', description: 'Choose a ward to refresh the temple readiness analysis.' }]
+    }
+
+    const highest = [...filteredRows].sort((a, b) => b.templeReady - a.templeReady)[0]
+    const lowest = [...filteredRows].sort((a, b) => a.templeReady - b.templeReady)[0]
+    const overallReadiness = filteredRows.reduce((sum, row) => sum + row.readiness, 0) / filteredRows.length
+    const attention = [...filteredRows].sort((a, b) => a.readiness - b.readiness)[0]
+
+    return [
+      { title: 'Highest Temple Recommend Rate', description: `${highest.ward} leads the stake with ${highest.templeReady} active temple recommends.` },
+      { title: 'Lowest Temple Recommend Rate', description: `${lowest.ward} has the lowest count at ${lowest.templeReady}.` },
+      { title: 'Overall Temple Readiness', description: `${overallReadiness.toFixed(1)}% average readiness across the selected wards.` },
+      { title: 'Ward Requiring Attention', description: `${attention.ward} needs the most follow-up based on the lowest readiness score.` },
+    ]
+  }, [filteredRows])
 
   return (
     <div className="space-y-8">
@@ -80,7 +98,7 @@ export default function TempleProgress() {
         </div>
       </header>
 
-      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-2">
         {summaryCards.map((card) => (
           <MetricCard key={card.label} title={card.label} value={card.value} change={card.change} icon={card.icon} />
         ))}
@@ -123,44 +141,22 @@ export default function TempleProgress() {
         </div>
       </section>
 
-      <FilterToolbar filters={templeProgressData.filters} />
+      <FilterToolbar
+        filters={templeProgressData.filters}
+        values={filters}
+        onChange={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
+      />
 
       <section className="grid gap-6 xl:grid-cols-[1.9fr_1.1fr]">
-        <WardTempleTable rows={templeProgressData.wardTable} />
-        <ExecutiveInsights items={templeProgressData.insights} />
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_1.9fr]">
-        <OrdinanceTimeline items={templeProgressData.timeline} />
-        <PreparationPipeline members={templeProgressData.pipeline} />
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-[1.2fr_1.8fr]">
-        <div className="rounded-[30px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_30px_80px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-6">
-          <div className="mb-6">
-            <p className="text-[0.7rem] uppercase tracking-[0.28em] text-slate-400">Readiness snapshot</p>
-            <h3 className="mt-2 text-2xl font-semibold text-white">Ward readiness summary</h3>
-          </div>
-
-          <div className="space-y-4">
-            {templeProgressData.wardTable.map((ward) => (
-              <div key={ward.ward} className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-white">{ward.ward}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">{ward.status}</p>
-                  </div>
-                  <span className="text-lg font-semibold text-white">{ward.readiness}%</span>
-                </div>
-                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-800/80">
-                  <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-400" style={{ width: `${ward.readiness}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <HeatMap rows={templeProgressData.heatmap} />
+        <WardTempleTable
+          rows={filteredRows.map((row) => ({
+            ...row,
+            activeMembers: row.templeReady + Math.max(row.recommendHolders - row.templeReady, 0),
+            withoutTempleRecommend: Math.max((row.templeReady ?? 0) - (row.recommendHolders ?? 0), 0),
+            withTempleRecommend: row.recommendHolders,
+          }))}
+        />
+        <ExecutiveInsights items={insights} />
       </section>
     </div>
   )

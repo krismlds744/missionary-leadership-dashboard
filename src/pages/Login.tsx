@@ -113,7 +113,7 @@ export default function Login() {
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               <div className="space-y-2">
                 <label htmlFor="username" className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  Username
+                  Username or email
                 </label>
                 <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)]">
                   <KeyRound className="h-4 w-4 text-slate-400" />
@@ -123,7 +123,7 @@ export default function Login() {
                     value={form.username}
                     onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
                     className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 focus:outline-none"
-                    placeholder="Enter username"
+                    placeholder="Enter username or email"
                   />
                 </div>
                 {errors.username && <p className="text-xs text-rose-300">{errors.username}</p>}
@@ -187,8 +187,8 @@ export default function Login() {
             </form>
 
             <div className="mt-6 rounded-[22px] border border-white/10 bg-white/[0.04] p-4 text-sm text-slate-300">
-              <p className="text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">Demo access</p>
-              <p className="mt-3 text-slate-200">Use any username above with password: <span className="font-medium text-white">password123</span></p>
+              <p className="text-[0.62rem] uppercase tracking-[0.22em] text-slate-400">Authorized access</p>
+              <p className="mt-3 text-slate-200">Use the account credentials provided by stake leadership.</p>
             </div>
           </div>
         </div>

@@ -3,9 +3,15 @@ import type { TempleFilters } from '../../types/pageData'
 
 interface FilterToolbarProps {
   filters: TempleFilters
+  values: {
+    ward: string
+    dateRange: string
+    ageGroup: string
+  }
+  onChange: (key: 'ward' | 'dateRange' | 'ageGroup', value: string) => void
 }
 
-export default function FilterToolbar({ filters }: FilterToolbarProps) {
+export default function FilterToolbar({ filters, values, onChange }: FilterToolbarProps) {
   return (
     <div className="rounded-[28px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.2)] backdrop-blur-xl sm:p-6">
       <div className="mb-4 flex items-center gap-3">
@@ -18,10 +24,14 @@ export default function FilterToolbar({ filters }: FilterToolbarProps) {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <label className="space-y-2">
           <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Ward</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
+          <select
+            value={values.ward}
+            onChange={(event) => onChange('ward', event.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50"
+          >
             {filters.ward.map((option) => (
               <option key={option} value={option}>{option}</option>
             ))}
@@ -30,7 +40,11 @@ export default function FilterToolbar({ filters }: FilterToolbarProps) {
 
         <label className="space-y-2">
           <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Date Range</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
+          <select
+            value={values.dateRange}
+            onChange={(event) => onChange('dateRange', event.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50"
+          >
             {filters.dateRange.map((option) => (
               <option key={option} value={option}>{option}</option>
             ))}
@@ -39,26 +53,12 @@ export default function FilterToolbar({ filters }: FilterToolbarProps) {
 
         <label className="space-y-2">
           <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Age Group</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
+          <select
+            value={values.ageGroup}
+            onChange={(event) => onChange('ageGroup', event.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50"
+          >
             {filters.ageGroup.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Member Status</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
-            {filters.memberStatus.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Preparation Stage</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
-            {filters.preparationStage.map((option) => (
               <option key={option} value={option}>{option}</option>
             ))}
           </select>

@@ -41,7 +41,7 @@ export default function Dashboard() {
         />
 
         <MetricCard
-          title="Calling Rate"
+          title="New Converts with Calling Rate"
           value={dashboardData.metrics.callingRate.value.toString()}
           change={dashboardData.metrics.callingRate.change}
           icon={UserCheck}

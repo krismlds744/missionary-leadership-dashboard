@@ -3,15 +3,13 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 
 const MainLayout = lazy(() => import('./layouts/MainLayout'))
-const Dashboard = lazy(() => import('./pages/Dashboard'))
 const StakeOverview = lazy(() => import('./pages/StakeOverview'))
+const StakeGoal = lazy(() => import('./pages/StakeGoal'))
 const Converts = lazy(() => import('./pages/Converts'))
 const Retention = lazy(() => import('./pages/Retention'))
-const TempleProgress = lazy(() => import('./pages/TempleProgress'))
 const Ministering = lazy(() => import('./pages/Ministering'))
-const LeadershipInsights = lazy(() => import('./pages/LeadershipInsights'))
 const MissionaryCandidates = lazy(() => import('./pages/MissionaryCandidates'))
-const ReportsCenter = lazy(() => import('./pages/ReportsCenter'))
+const StakePerformanceAnalytics = lazy(() => import('./pages/StrategicInsights'))
 const Settings = lazy(() => import('./pages/Settings'))
 const Login = lazy(() => import('./pages/Login'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
@@ -60,15 +58,14 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
-          <Route path="stake-overview" element={<StakeOverview />} />
+          <Route index element={<StakeOverview />} />
+          <Route path="stake-overview" element={<Navigate to="/" replace />} />
+          <Route path="stake-goal" element={<StakeGoal />} />
           <Route path="converts" element={<Converts />} />
           <Route path="retention" element={<Retention />} />
-          <Route path="temple-progress" element={<TempleProgress />} />
           <Route path="ministering" element={<Ministering />} />
           <Route path="missionary-candidates" element={<MissionaryCandidates />} />
-          <Route path="leadership-insights" element={<LeadershipInsights />} />
-          <Route path="reports-center" element={<ReportsCenter />} />
+          <Route path="stake-performance" element={<StakePerformanceAnalytics />} />
           <Route path="settings" element={<Settings />} />
         </Route>
 

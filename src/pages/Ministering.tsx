@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   ArrowUpRight,
   CalendarRange,
@@ -6,45 +6,42 @@ import {
   Filter,
   HeartHandshake,
   MessageSquareText,
-  ShieldCheck,
-  TrendingUp,
-  Users,
 } from 'lucide-react'
 import MetricCard from '../components/dashboard/MetricCard'
-import CompanionshipDashboard from '../components/ministering/CompanionshipDashboard'
-import CoverageHeatMap from '../components/ministering/CoverageHeatMap'
 import ExecutiveInsights from '../components/ministering/ExecutiveInsights'
-import FilterToolbar from '../components/ministering/FilterToolbar'
-import MembersAttentionPanel from '../components/ministering/MembersAttentionPanel'
-import MinisteringTimeline from '../components/ministering/MinisteringTimeline'
-import MinisteringTrendChart from '../components/ministering/MinisteringTrendChart'
 import WardMinisteringTable from '../components/ministering/WardMinisteringTable'
 import { ministeringData } from '../data/ministering'
-import type { MinisteringMetricKey } from '../types/pageData'
 
-const summaryIcons = [HeartHandshake, Users, ShieldCheck, MessageSquareText, ArrowUpRight, TrendingUp] as const
+const summaryIcons = [HeartHandshake, MessageSquareText, ArrowUpRight, CalendarRange] as const
 
 export default function Ministering() {
-  const [activeMetric, setActiveMetric] = useState<MinisteringMetricKey>('coverage')
+  const filteredRows = useMemo(() => ministeringData.wardTable, [])
+
+  const brothersCompleted = 42
+  const brothersTotal = 84
+  const sistersCompleted = 58
+  const sistersTotal = 102
+
+  const brothersRemaining = brothersTotal - brothersCompleted
+  const sistersRemaining = sistersTotal - sistersCompleted
 
   const summaryCards = useMemo(
     () => [
-      { label: 'Ministering Coverage', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[0] },
-      { label: 'Active Companionships', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[1] },
-      { label: 'Members Assigned', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[2] },
-      { label: 'Monthly Interviews Completed', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[3] },
-      { label: 'Members Without Assignments', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[4] },
-      { label: 'Members Requiring Immediate Attention', value: 'N/A', change: 'Not reported in PDF', icon: summaryIcons[5] },
+      {
+        label: 'Ministering Brothers',
+        value: `${brothersCompleted.toLocaleString()} / ${brothersTotal.toLocaleString()}`,
+        change: `${Math.round((brothersCompleted / brothersTotal) * 100)}% complete • ${brothersRemaining.toLocaleString()} remaining`,
+        icon: summaryIcons[0],
+      },
+      {
+        label: 'Ministering Sisters',
+        value: `${sistersCompleted.toLocaleString()} / ${sistersTotal.toLocaleString()}`,
+        change: `${Math.round((sistersCompleted / sistersTotal) * 100)}% complete • ${sistersRemaining.toLocaleString()} remaining`,
+        icon: summaryIcons[1],
+      },
     ],
-    [],
+    [brothersCompleted, brothersRemaining, brothersTotal, sistersCompleted, sistersRemaining, sistersTotal],
   )
-
-  const metricOptions: Array<{ key: MinisteringMetricKey; label: string }> = [
-    { key: 'coverage', label: 'Coverage %' },
-    { key: 'interviews', label: 'Interviews Completed' },
-    { key: 'companionships', label: 'Active Companionships' },
-    { key: 'visits', label: 'Monthly Visits' },
-  ]
 
   return (
     <div className="space-y-8">
@@ -52,7 +49,7 @@ export default function Ministering() {
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="max-w-2xl">
             <p className="text-[0.7rem] uppercase tracking-[0.28em] text-slate-400">Ministering</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Ministering coverage and companionship health</h1>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Ministering Progress</h1>
             <p className="mt-3 text-sm text-slate-300 sm:text-base">
               Monitor companionship effectiveness, confirm follow-up coverage, and identify members who need additional support from leadership and ministry teams.
             </p>
@@ -79,79 +76,18 @@ export default function Ministering() {
         </div>
       </header>
 
-      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-2">
         {summaryCards.map((card) => (
           <MetricCard key={card.label} title={card.label} value={card.value} change={card.change} icon={card.icon} />
         ))}
       </section>
 
-      <section className="rounded-[30px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_30px_80px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-6">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[0.7rem] uppercase tracking-[0.28em] text-slate-400">Trend</p>
-            <h3 className="mt-2 text-2xl font-semibold text-white">Ministering coverage trend</h3>
-          </div>
-
-          <div className="inline-flex flex-wrap rounded-full border border-white/10 bg-white/5 p-1">
-            {metricOptions.map((option) => (
-              <button
-                key={option.key}
-                type="button"
-                onClick={() => setActiveMetric(option.key)}
-                className={[
-                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-                  activeMetric === option.key ? 'bg-white text-slate-900' : 'text-slate-300 hover:text-white',
-                ].join(' ')}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <MinisteringTrendChart data={ministeringData.trend} metric={activeMetric} />
+      <section className="grid gap-6">
+        <WardMinisteringTable rows={filteredRows} />
       </section>
 
-      <FilterToolbar filters={ministeringData.filters} />
-
-      <section className="grid gap-6 xl:grid-cols-[1.9fr_1.1fr]">
-        <WardMinisteringTable rows={ministeringData.wardTable} />
+      <section className="grid gap-6">
         <ExecutiveInsights items={ministeringData.insights} />
-      </section>
-
-      <CompanionshipDashboard items={ministeringData.companionships} />
-
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_1.9fr]">
-        <MinisteringTimeline items={ministeringData.timeline} />
-        <MembersAttentionPanel members={ministeringData.membersNeedingAttention} />
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-[1.2fr_1.8fr]">
-        <div className="rounded-[30px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_30px_80px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-6">
-          <div className="mb-6">
-            <p className="text-[0.7rem] uppercase tracking-[0.28em] text-slate-400">Coverage snapshot</p>
-            <h3 className="mt-2 text-2xl font-semibold text-white">Ward coverage summary</h3>
-          </div>
-
-          <div className="space-y-4">
-            {ministeringData.wardTable.map((ward) => (
-              <div key={ward.ward} className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-white">{ward.ward}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">{ward.healthStatus}</p>
-                  </div>
-                  <span className="text-lg font-semibold text-white">{ward.coverage}%</span>
-                </div>
-                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-800/80">
-                  <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-sky-400 to-amber-400" style={{ width: `${ward.coverage}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <CoverageHeatMap rows={ministeringData.heatmap} />
       </section>
     </div>
   )

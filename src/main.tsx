@@ -5,6 +5,9 @@ import './index.css'
 import App from './App.tsx'
 import AppErrorBoundary from './components/ui/AppErrorBoundary'
 import { AuthProvider } from './context/AuthContext'
+import { applyTheme, getTheme } from './utils/theme'
+
+applyTheme(getTheme())
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

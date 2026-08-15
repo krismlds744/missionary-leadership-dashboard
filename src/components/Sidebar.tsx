@@ -1,13 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
 import {
-  Activity,
   ChartPie,
-  FileText,
-  Gauge,
   Grid,
   Heart,
   LogOut,
-  MapPin,
   Settings,
   Sparkles,
   UserRound,
@@ -17,15 +13,13 @@ import {
 import { useAuth } from '../hooks/useAuth'
 
 const navItems: Array<{ label: string; path: string; icon: LucideIcon; permission: string }> = [
-  { label: 'Dashboard', path: '/', icon: Gauge, permission: 'dashboard' },
-  { label: 'Stake Overview', path: '/stake-overview', icon: Grid, permission: 'stakeOverview' },
+  { label: 'Stake Overview', path: '/', icon: Grid, permission: 'stakeOverview' },
   { label: 'Converts', path: '/converts', icon: Users, permission: 'converts' },
   { label: 'Retention', path: '/retention', icon: Heart, permission: 'retention' },
-  { label: 'Temple Progress', path: '/temple-progress', icon: MapPin, permission: 'templeProgress' },
   { label: 'Ministering', path: '/ministering', icon: Sparkles, permission: 'ministering' },
   { label: 'Missionary Candidates', path: '/missionary-candidates', icon: UserRound, permission: 'missionaryCandidates' },
-  { label: 'Leadership Insights', path: '/leadership-insights', icon: Activity, permission: 'leadershipInsights' },
-  { label: 'Reports Center', path: '/reports-center', icon: FileText, permission: 'reports' },
+  { label: 'Stake Goal', path: '/stake-goal', icon: ChartPie, permission: 'stakeGoal' },
+  { label: 'Stake Performance Analytics', path: '/stake-performance', icon: ChartPie, permission: 'leadershipInsights' },
   { label: 'Settings', path: '/settings', icon: Settings, permission: 'settings' },
 ]
 
@@ -52,6 +46,11 @@ function SidebarItem({ label, path, icon: Icon }: { label: string; path: string;
 export default function Sidebar() {
   const { user, logout } = useAuth()
   const visibleItems = navItems.filter((item) => user?.permissions.includes(item.permission as never))
+  const accountLabel = user?.username === 'krislds744'
+    ? 'Admin'
+    : user?.role === 'Stake President'
+      ? 'President'
+      : user?.role
 
   return (
     <div className="flex h-full flex-col justify-between p-5">
@@ -77,8 +76,7 @@ export default function Sidebar() {
         {user && (
           <div className="rounded-[26px] border border-white/10 bg-white/5 p-4 text-sm text-slate-300 shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
             <p className="text-[0.65rem] uppercase tracking-[0.28em] text-slate-500">Signed in</p>
-            <p className="mt-2 font-medium text-white">{user.name}</p>
-            <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">{user.role}</p>
+            <p className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-slate-300">{accountLabel}</p>
             <button
               type="button"
               onClick={logout}

@@ -1,25 +1,11 @@
 import { createContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { mockUsers } from '../data/users'
 import type { AuthContextValue, LoginCredentials, Permission, User } from '../types/auth'
+import { supabase } from '../lib/supabase'
 
-const AUTH_STORAGE_KEY = 'mission-insights-auth-user'
-
-const readStoredUser = (): User | null => {
-  try {
-    const localUser = localStorage.getItem(AUTH_STORAGE_KEY)
-    if (localUser) {
-      return JSON.parse(localUser) as User
-    }
-
-    const sessionUser = sessionStorage.getItem(AUTH_STORAGE_KEY)
-    if (sessionUser) {
-      return JSON.parse(sessionUser) as User
-    }
-  } catch {
-    return null
-  }
-
-  return null
+function userForEmail(email?: string): User | null {
+  if (!email) return null
+  return mockUsers.find((candidate) => candidate.email.toLowerCase() === email.toLowerCase()) ?? null
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -29,33 +15,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const storedUser = readStoredUser()
-    setUser(storedUser)
-    setIsLoading(false)
+    let isMounted = true
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (isMounted) {
+        setUser(userForEmail(session?.user.email))
+        setIsLoading(false)
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(userForEmail(session?.user.email))
+      setIsLoading(false)
+    })
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
-  const login = async ({ username, password, rememberMe }: LoginCredentials) => {
-    await new Promise((resolve) => setTimeout(resolve, 700))
+  const login = async ({ username, password }: LoginCredentials) => {
+    const identifier = username.trim().toLowerCase()
+    const account = mockUsers.find((candidate) => candidate.username.toLowerCase() === identifier || candidate.email.toLowerCase() === identifier)
+    if (!account) throw new Error('This account is not authorized for Mission Insights.')
 
-    const foundUser = mockUsers.find(
-      (candidate) => candidate.username.toLowerCase() === username.trim().toLowerCase() && candidate.password === password,
-    )
+    const { data, error } = await supabase.auth.signInWithPassword({ email: account.email, password })
+    if (error) throw new Error(error.message)
 
-    if (!foundUser) {
-      throw new Error('Invalid username or password.')
+    const authorizedUser = userForEmail(data.user.email)
+    if (!authorizedUser) {
+      await supabase.auth.signOut()
+      throw new Error('This account is not authorized for Mission Insights.')
     }
 
-    const storedUser = { ...foundUser }
-    const storage = rememberMe ? localStorage : sessionStorage
-    storage.setItem(AUTH_STORAGE_KEY, JSON.stringify(storedUser))
-
-    setUser(storedUser)
-    return storedUser
+    setUser(authorizedUser)
+    return authorizedUser
   }
 
   const logout = () => {
-    localStorage.removeItem(AUTH_STORAGE_KEY)
-    sessionStorage.removeItem(AUTH_STORAGE_KEY)
+    void supabase.auth.signOut()
     setUser(null)
   }
 
@@ -67,15 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const permissionMap: Record<string, Permission> = {
-      '/': 'dashboard',
-      '/stake-overview': 'stakeOverview',
+      '/': 'stakeOverview',
       '/converts': 'converts',
       '/retention': 'retention',
-      '/temple-progress': 'templeProgress',
       '/ministering': 'ministering',
       '/missionary-candidates': 'missionaryCandidates',
-      '/leadership-insights': 'leadershipInsights',
       '/reports-center': 'reports',
+      '/stake-performance': 'leadershipInsights',
       '/settings': 'settings',
     }
 

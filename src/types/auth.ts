@@ -12,6 +12,7 @@ export type Role =
 export type Permission =
   | 'dashboard'
   | 'stakeOverview'
+  | 'stakeGoal'
   | 'converts'
   | 'retention'
   | 'templeProgress'
@@ -26,7 +27,6 @@ export type User = {
   name: string
   email: string
   username: string
-  password: string
   role: Role
   permissions: Permission[]
 }
@@ -40,6 +40,7 @@ export type LoginCredentials = {
 export const allPermissions: Permission[] = [
   'dashboard',
   'stakeOverview',
+  'stakeGoal',
   'converts',
   'retention',
   'templeProgress',
@@ -53,13 +54,16 @@ export const allPermissions: Permission[] = [
 export const routePermissionMap: Record<string, Permission> = {
   '/': 'dashboard',
   '/stake-overview': 'stakeOverview',
+  '/stake-goal': 'stakeGoal',
   '/converts': 'converts',
   '/retention': 'retention',
   '/temple-progress': 'templeProgress',
   '/ministering': 'ministering',
   '/missionary-candidates': 'missionaryCandidates',
+  '/strategic-insights': 'leadershipInsights',
   '/leadership-insights': 'leadershipInsights',
   '/reports-center': 'reports',
+  '/stake-performance': 'leadershipInsights',
   '/settings': 'settings',
 }
 

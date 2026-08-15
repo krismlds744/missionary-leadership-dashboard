@@ -1,7 +1,6 @@
 import {
   Activity,
-  BarChart3,
-  FileText,
+  ChartPie,
   Gauge,
   Grid,
   Heart,
@@ -9,7 +8,6 @@ import {
   LogOut,
   Settings,
   Sparkles,
-  UserRound,
   Users,
 } from 'lucide-react'
 import type { SearchItem } from '../types/search'
@@ -38,6 +36,18 @@ export const searchItems: SearchItem[] = [
     icon: Grid,
     category: 'Page',
     keywords: ['stake', 'ward', 'overview', 'performance'],
+  },
+  {
+    id: 'stake-goal',
+    label: 'Stake Goal',
+    page: 'Stake Goal',
+    section: 'Stake Health',
+    description: '2026 goals summary across three pillars: Come Unto Christ, Temple Covenants, and Rising Generation.',
+    path: '/stake-goal',
+    shortcut: '⌘G',
+    icon: ChartPie,
+    category: 'Page',
+    keywords: ['stake', 'goal', '2026', 'summary', 'endowed', 'missionary', 'baptism'],
   },
   {
     id: 'converts',
@@ -88,18 +98,6 @@ export const searchItems: SearchItem[] = [
     keywords: ['ministering', 'companionship', 'coverage', 'care'],
   },
   {
-    id: 'missionary-candidates',
-    label: 'Missionary Candidates',
-    page: 'Missionary Candidates',
-    section: 'Preparation Pipeline',
-    description: 'Candidate tracking, documents, and mission-readiness progress.',
-    path: '/missionary-candidates',
-    shortcut: '⌘6',
-    icon: UserRound,
-    category: 'Page',
-    keywords: ['missionary', 'candidates', 'passport', 'call'],
-  },
-  {
     id: 'leadership-insights',
     label: 'Leadership Insights',
     page: 'Leadership Insights',
@@ -110,18 +108,6 @@ export const searchItems: SearchItem[] = [
     icon: Activity,
     category: 'Page',
     keywords: ['leadership', 'insights', 'strategy', 'recommendations'],
-  },
-  {
-    id: 'reports-center',
-    label: 'Reports Center',
-    page: 'Reports Center',
-    section: 'Executive Reporting',
-    description: 'Generate, schedule, and export stakeholder reports for leadership review.',
-    path: '/reports-center',
-    shortcut: '⌘8',
-    icon: FileText,
-    category: 'Page',
-    keywords: ['reports', 'export', 'schedule', 'generate'],
   },
   {
     id: 'settings',
@@ -148,30 +134,6 @@ export const searchItems: SearchItem[] = [
     keywords: ['dashboard', 'go', 'home', 'overview'],
   },
   {
-    id: 'quick-report',
-    label: 'Create Report',
-    page: 'Reports Center',
-    section: 'Quick Action',
-    description: 'Open the report builder to create a new executive summary.',
-    path: '/reports-center',
-    shortcut: '⌘R',
-    icon: FileText,
-    category: 'Quick Action',
-    keywords: ['report', 'create', 'generate', 'new'],
-  },
-  {
-    id: 'quick-missionary',
-    label: 'Open Missionary Candidates',
-    page: 'Missionary Candidates',
-    section: 'Quick Action',
-    description: 'Open the missionary pipeline and readiness board.',
-    path: '/missionary-candidates',
-    shortcut: '⌘M',
-    icon: UserRound,
-    category: 'Quick Action',
-    keywords: ['missionary', 'candidates', 'open'],
-  },
-  {
     id: 'quick-temple',
     label: 'View Temple Progress',
     page: 'Temple Progress',
@@ -196,18 +158,6 @@ export const searchItems: SearchItem[] = [
     keywords: ['leadership', 'insights', 'open'],
   },
   {
-    id: 'quick-stake-report',
-    label: 'Generate Stake Report',
-    page: 'Reports Center',
-    section: 'Quick Action',
-    description: 'Build a new stake summary report from current metrics.',
-    path: '/reports-center',
-    shortcut: '⌘G',
-    icon: BarChart3,
-    category: 'Quick Action',
-    keywords: ['stake', 'report', 'generate'],
-  },
-  {
     id: 'quick-signout',
     label: 'Sign Out',
     page: 'Authentication',
@@ -223,14 +173,12 @@ export const searchItems: SearchItem[] = [
 
 export const recentSearches = [
   { id: 'recent-1', label: 'Missionary Candidates', path: '/missionary-candidates' },
-  { id: 'recent-2', label: 'Reports Center', path: '/reports-center' },
-  { id: 'recent-3', label: 'Temple Progress', path: '/temple-progress' },
-  { id: 'recent-4', label: 'Leadership Insights', path: '/leadership-insights' },
-  { id: 'recent-5', label: 'Retention', path: '/retention' },
+  { id: 'recent-2', label: 'Temple Progress', path: '/temple-progress' },
+  { id: 'recent-3', label: 'Leadership Insights', path: '/leadership-insights' },
+  { id: 'recent-4', label: 'Retention', path: '/retention' },
 ]
 
 export const defaultFavorites = [
   { id: 'favorite-1', label: 'Dashboard', path: '/' },
-  { id: 'favorite-2', label: 'Reports Center', path: '/reports-center' },
-  { id: 'favorite-3', label: 'Missionary Candidates', path: '/missionary-candidates' },
+  { id: 'favorite-2', label: 'Missionary Candidates', path: '/missionary-candidates' },
 ]

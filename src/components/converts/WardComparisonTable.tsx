@@ -1,4 +1,4 @@
-import { ArrowUpDown, TrendingUp } from 'lucide-react'
+import { ArrowUpDown } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { WardComparisonRow } from '../../types/pageData'
 
@@ -6,15 +6,8 @@ interface WardComparisonTableProps {
   rows: WardComparisonRow[]
 }
 
-type SortKey = 'ward' | 'investigators' | 'baptisms' | 'confirmations' | 'templeReady' | 'retention' | 'status'
+type SortKey = 'ward' | 'baptisms' | 'confirmations' | 'templeReady' | 'calling' | 'retention'
 type SortDirection = 'asc' | 'desc'
-
-const statusStyles: Record<string, string> = {
-  Strong: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300',
-  Stable: 'border-sky-400/30 bg-sky-500/10 text-sky-300',
-  Watch: 'border-amber-400/30 bg-amber-500/10 text-amber-300',
-  Risk: 'border-rose-400/30 bg-rose-500/10 text-rose-300',
-}
 
 export default function WardComparisonTable({ rows }: WardComparisonTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('retention')
@@ -57,10 +50,6 @@ export default function WardComparisonTable({ rows }: WardComparisonTableProps) 
           <h3 className="mt-2 text-2xl font-semibold text-white">Ward performance</h3>
         </div>
 
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300">
-          <TrendingUp className="h-3.5 w-3.5" />
-          Updated weekly
-        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -69,14 +58,13 @@ export default function WardComparisonTable({ rows }: WardComparisonTableProps) 
             <tr className="bg-white/5 text-slate-300">
               {[
                 ['Ward', 'ward'],
-                ['Investigators', 'investigators'],
                 ['Baptisms', 'baptisms'],
                 ['Confirmations', 'confirmations'],
-                ['Temple Ready', 'templeReady'],
+                ['New Converts Who Participated in Temple and FH Work', 'templeReady'],
+                ['New Converts with Calling', 'calling'],
                 ['Retention %', 'retention'],
-                ['Status', 'status'],
               ].map(([label, key]) => (
-                <th key={key} className="px-5 py-3 text-xs uppercase tracking-[0.2em] text-slate-400 sm:px-6">
+                <th key={key} className={`px-5 py-3 text-xs uppercase tracking-[0.2em] text-slate-400 sm:px-6 ${key === 'ward' ? 'text-left' : 'text-center'}`}>
                   <button
                     type="button"
                     onClick={() => handleSort(key as SortKey)}
@@ -94,13 +82,13 @@ export default function WardComparisonTable({ rows }: WardComparisonTableProps) 
             {sortedRows.map((row) => (
               <tr key={row.ward} className="border-t border-white/10 transition-colors hover:bg-white/[0.03]">
                 <td className="px-5 py-4 text-sm font-medium text-white sm:px-6">{row.ward}</td>
-                <td className="px-5 py-4 text-sm text-slate-200 sm:px-6">{row.investigators}</td>
-                <td className="px-5 py-4 text-sm text-slate-200 sm:px-6">{row.baptisms}</td>
-                <td className="px-5 py-4 text-sm text-slate-200 sm:px-6">{row.confirmations}</td>
-                <td className="px-5 py-4 text-sm text-slate-200 sm:px-6">{row.templeReady}</td>
+                <td className="px-5 py-4 text-center text-sm text-slate-200 sm:px-6">{row.baptisms}</td>
+                <td className="px-5 py-4 text-center text-sm text-slate-200 sm:px-6">{row.confirmations}</td>
+                <td className="px-5 py-4 text-center text-sm text-slate-200 sm:px-6">{row.templeReady}</td>
+                <td className="px-5 py-4 text-center text-sm text-slate-200 sm:px-6">{row.calling}</td>
 
-                <td className="px-5 py-4 sm:px-6">
-                  <div className="flex items-center gap-3">
+                <td className="px-5 py-4 text-center sm:px-6">
+                  <div className="flex items-center justify-center gap-3">
                     <div className="h-2.5 w-24 overflow-hidden rounded-full bg-slate-800">
                       <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-400" style={{ width: `${row.retention}%` }} />
                     </div>
@@ -108,11 +96,6 @@ export default function WardComparisonTable({ rows }: WardComparisonTableProps) 
                   </div>
                 </td>
 
-                <td className="px-5 py-4 sm:px-6">
-                  <span className={`inline-flex rounded-full border px-2.5 py-1 text-[0.7rem] font-medium ${statusStyles[row.status]}`}>
-                    {row.status}
-                  </span>
-                </td>
               </tr>
             ))}
           </tbody>

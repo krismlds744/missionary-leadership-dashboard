@@ -14,6 +14,7 @@ node_modules/
 dist/
 dist-ssr/
 release/
+release-current/
 
 # Local environment
 *.local
@@ -28,3 +29,4 @@ release/
 *.njsproj
 *.sln
 *.sw?
+.vercel

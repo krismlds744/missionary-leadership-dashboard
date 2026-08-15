@@ -43,11 +43,12 @@ export type WardPerformanceStatus = 'Strong' | 'Stable' | 'Watch' | 'Concern'
 
 export type WardPerformanceRow = {
   ward: string
-  attendance: number
+  attendance: string
   converts: number
   templeReady: number
   missionaryCandidates: number
   ministering: number
+  inactiveMembers: number
   status: WardPerformanceStatus
 }
 
@@ -81,9 +82,14 @@ export type StakeOverviewData = {
     totalWards: number
     totalMembers: number
     activeMembers: number
+    inactiveMembers: number
     averageSacramentAttendance: string
     totalPriesthoodHolders: number
     totalYouth: number
+    youngMenTotal: number
+    youngMenAttending: number
+    youngWomenTotal: number
+    youngWomenAttending: number
   }
   wardPerformance: WardPerformanceRow[]
   monthlyGrowth: GrowthPoint[]
@@ -97,6 +103,8 @@ export type ConvertFunnelStage = {
   name: string
   count: number
   percent: number
+  detail?: string
+  wardBreakdown?: Array<{ ward: string; count: number }>
 }
 
 export type ConvertTrendMetricKey = 'baptisms' | 'confirmations' | 'templeReadiness'
@@ -114,6 +122,7 @@ export type WardComparisonRow = {
   baptisms: number
   confirmations: number
   templeReady: number
+  calling: number
   retention: number
   status: 'Strong' | 'Stable' | 'Watch' | 'Risk'
 }
@@ -339,7 +348,9 @@ export type WardMinisteringRow = {
   ward: string
   coverage: number
   assignedMembers: number
-  interviewsCompleted: number
+  interviewsCompleted: string
+  brotherInterviews: string
+  sisterInterviews: string
   activeCompanionships: number
   membersWithoutAssignments: number
   healthStatus: MinisteringHealthStatus
@@ -386,6 +397,7 @@ export type MinisteringData = {
     activeCompanionships: number
     membersAssigned: number
     monthlyInterviewsCompleted: number
+    interviewsNotCompleted: number
     membersWithoutAssignments: number
     immediateAttentionMembers: number
   }

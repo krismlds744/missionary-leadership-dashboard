@@ -3,9 +3,14 @@ import type { MinisteringFilters } from '../../types/pageData'
 
 interface FilterToolbarProps {
   filters: MinisteringFilters
+  values: {
+    ward: string
+    dateRange: string
+  }
+  onChange: (key: 'ward' | 'dateRange', value: string) => void
 }
 
-export default function FilterToolbar({ filters }: FilterToolbarProps) {
+export default function FilterToolbar({ filters, values, onChange }: FilterToolbarProps) {
   return (
     <div className="rounded-[28px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.2)] backdrop-blur-xl sm:p-6">
       <div className="mb-4 flex items-center gap-3">
@@ -18,10 +23,14 @@ export default function FilterToolbar({ filters }: FilterToolbarProps) {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
         <label className="space-y-2">
           <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Ward</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
+          <select
+            value={values.ward}
+            onChange={(event) => onChange('ward', event.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50"
+          >
             {filters.ward.map((option) => (
               <option key={option} value={option}>{option}</option>
             ))}
@@ -29,45 +38,13 @@ export default function FilterToolbar({ filters }: FilterToolbarProps) {
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Organization</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
-            {filters.organization.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="space-y-2">
           <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Date Range</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
+          <select
+            value={values.dateRange}
+            onChange={(event) => onChange('dateRange', event.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50"
+          >
             {filters.dateRange.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Assignment Status</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
-            {filters.assignmentStatus.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Interview Status</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
-            {filters.interviewStatus.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Risk Level</span>
-          <select className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-sky-400/50">
-            {filters.riskLevel.map((option) => (
               <option key={option} value={option}>{option}</option>
             ))}
           </select>

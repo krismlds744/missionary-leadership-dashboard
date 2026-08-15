@@ -1,4 +1,4 @@
-import { ArrowUpDown, TrendingUp } from 'lucide-react'
+import { ArrowUpDown } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { WardRetentionRow } from '../../types/pageData'
 
@@ -56,10 +56,6 @@ export default function WardRetentionTable({ rows }: WardRetentionTableProps) {
           <h3 className="mt-2 text-2xl font-semibold text-white">Ward retention</h3>
         </div>
 
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300">
-          <TrendingUp className="h-3.5 w-3.5" />
-          Updated weekly
-        </div>
       </div>
 
       <div className="overflow-x-auto">

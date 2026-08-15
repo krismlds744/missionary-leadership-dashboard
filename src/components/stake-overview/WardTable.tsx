@@ -10,15 +10,17 @@ type SortKey = 'ward' | 'attendance' | 'converts' | 'templeReady' | 'missionaryC
 
 type SortDirection = 'asc' | 'desc'
 
+function AttendanceProgress({ value }: { value: string }) {
+  const [actual, potential] = value.split('/').map(Number)
+  const percent = potential > 0 ? actual / potential * 100 : 0
+  const color = percent >= 50 ? 'bg-emerald-400' : percent >= 35 ? 'bg-yellow-300' : 'bg-rose-400'
+  return <div className="mx-auto min-w-56"><div className="relative h-8 w-full overflow-hidden rounded-full border border-white/10 bg-white/10"><div className={`h-full rounded-full ${color} transition-[width] duration-500`} style={{ width: `${percent}%` }} /><span className="absolute inset-0 flex items-center justify-center text-base font-bold tracking-wide text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9)]">{value}</span></div></div>
+}
+
 
 export default function WardTable({ rows }: WardTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('attendance')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-
-  const totalAttendance = useMemo(
-    () => rows.reduce((sum, row) => sum + Number(row.attendance), 0),
-    [rows],
-  )
 
   const sortedRows = useMemo(() => {
     const items = [...rows]
@@ -30,8 +32,8 @@ export default function WardTable({ rows }: WardTableProps) {
         return a.ward.localeCompare(b.ward) * direction
       }
 
-      const left = Number(a[sortKey])
-      const right = Number(b[sortKey])
+      const left = sortKey === 'attendance' ? Number(a.attendance.split('/')[0]) : Number(a[sortKey])
+      const right = sortKey === 'attendance' ? Number(b.attendance.split('/')[0]) : Number(b[sortKey])
 
       if (Number.isNaN(left) || Number.isNaN(right)) {
         return 0
@@ -77,7 +79,7 @@ export default function WardTable({ rows }: WardTableProps) {
                 ['Converts', 'converts'],
                 ['Temple Ready', 'templeReady'],
               ].map(([label, key]) => (
-                <th key={key} className="px-5 py-3 text-xs uppercase tracking-[0.2em] text-slate-400 sm:px-6">
+                <th key={key} className="px-5 py-3 text-center text-xs uppercase tracking-[0.2em] text-slate-400 sm:px-6">
                   <button
                     type="button"
                     onClick={() => handleSort(key as SortKey)}
@@ -94,22 +96,12 @@ export default function WardTable({ rows }: WardTableProps) {
           <tbody>
             {sortedRows.map((row) => (
               <tr key={row.ward} className="border-t border-white/10 transition-colors hover:bg-white/[0.03]">
-                <td className="px-5 py-4 text-sm font-medium text-white sm:px-6">{row.ward}</td>
+                <td className="px-5 py-4 text-center text-sm font-medium text-white sm:px-6">{row.ward}</td>
 
-                <td className="px-5 py-4 sm:px-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2.5 w-28 overflow-hidden rounded-full bg-slate-800">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-sky-400 via-cyan-400 to-indigo-400"
-                        style={{ width: `${Math.round((Number(row.attendance) / totalAttendance) * 100)}%` }}
-                      />
-                    </div>
-                    <span className="text-sm text-slate-200">{row.attendance}</span>
-                  </div>
-                </td>
+                <td className="px-5 py-4 sm:px-6"><AttendanceProgress value={row.attendance} /></td>
 
-                <td className="px-5 py-4 text-sm text-slate-200 sm:px-6">{row.converts}</td>
-                <td className="px-5 py-4 text-sm text-slate-200 sm:px-6">{row.templeReady}</td>
+                <td className="px-5 py-4 text-center text-sm text-slate-200 sm:px-6">{row.converts}</td>
+                <td className="px-5 py-4 text-center text-sm text-slate-200 sm:px-6">{row.templeReady}</td>
               </tr>
             ))}
           </tbody>
