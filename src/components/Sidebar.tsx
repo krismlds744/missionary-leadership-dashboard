@@ -23,13 +23,14 @@ const navItems: Array<{ label: string; path: string; icon: LucideIcon; permissio
   { label: 'Settings', path: '/settings', icon: Settings, permission: 'settings' },
 ]
 
-function SidebarItem({ label, path, icon: Icon }: { label: string; path: string; icon: LucideIcon }) {
+function SidebarItem({ label, path, icon: Icon, onNavigate }: { label: string; path: string; icon: LucideIcon; onNavigate?: () => void }) {
   const location = useLocation()
   const isActive = location.pathname === path
 
   return (
     <Link
       to={path}
+      onClick={onNavigate}
       className={[
         'group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[0.92rem] font-medium transition-all duration-300 ease-out',
         isActive
@@ -43,7 +44,7 @@ function SidebarItem({ label, path, icon: Icon }: { label: string; path: string;
   )
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuth()
   const visibleItems = navItems.filter((item) => user?.permissions.includes(item.permission as never))
   const accountLabel = user?.username === 'krislds744'
@@ -53,7 +54,7 @@ export default function Sidebar() {
       : user?.role
 
   return (
-    <div className="flex h-full flex-col justify-between p-5">
+    <div className="flex min-h-0 flex-1 flex-col justify-between overflow-y-auto p-5">
       <div>
         <div className="mb-7 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3.5 shadow-[0_20px_60px_rgba(15,23,42,0.25)]">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
@@ -67,7 +68,7 @@ export default function Sidebar() {
 
         <nav className="space-y-1.5">
           {visibleItems.map((item) => (
-            <SidebarItem key={item.path} label={item.label} path={item.path} icon={item.icon} />
+            <SidebarItem key={item.path} label={item.label} path={item.path} icon={item.icon} onNavigate={onNavigate} />
           ))}
         </nav>
       </div>
