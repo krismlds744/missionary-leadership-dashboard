@@ -8,5 +8,5 @@ export default defineConfig({
     tailwindcss(),
   ],
 
-  base: process.env.GITHUB_ACTIONS ? "/missionary-leadership-dashboard/" : "./",
+  base: "./",
 });
