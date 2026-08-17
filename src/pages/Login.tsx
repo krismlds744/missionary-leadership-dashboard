@@ -75,7 +75,7 @@ export default function Login() {
             </div>
             <div>
               <p className="text-[0.62rem] uppercase tracking-[0.28em] text-slate-400">Mission</p>
-              <p className="text-lg font-semibold text-white">Mission Insights</p>
+              <p className="text-lg font-semibold text-white">Fairview Stake Missionary Work Insights</p>
             </div>
           </div>
 
@@ -89,18 +89,6 @@ export default function Login() {
             </p>
           </div>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            {[
-              ['2,991', 'Stake members'],
-              ['966', 'Avg. sacrament attendance'],
-              ['421', 'Temple recommend holders'],
-            ].map(([value, label]) => (
-              <div key={label} className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                <p className="text-2xl font-semibold text-white">{value}</p>
-                <p className="mt-2 text-xs uppercase tracking-[0.2em] text-slate-400">{label}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
         <div className="border-t border-white/10 bg-slate-900/70 p-6 sm:p-10 lg:border-l lg:border-t-0">
