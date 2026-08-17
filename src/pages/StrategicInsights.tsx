@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import {
-  AlertTriangle,
   ArrowUpRight,
   Building2,
   CalendarRange,
@@ -21,12 +20,9 @@ import {
 import {
   allQuarters,
   allYears,
-  getBiggestImprovements,
   getExecutiveKpis,
   getFilteredHistory,
   getForecasts,
-  getHeatmapMatrix,
-  getLeadershipAttention,
   getNarrativeObservations,
   getRecommendations,
   getScorecardRows,
@@ -99,12 +95,9 @@ export default function StrategicInsights() {
 
   const scorecardRows = useMemo(() => getScorecardRows(), [])
   const narrative = useMemo(() => getNarrativeObservations(), [])
-  const biggestImprovements = useMemo(() => getBiggestImprovements(), [])
-  const needsAttention = useMemo(() => getLeadershipAttention(), [])
   const timeline = useMemo(() => getTimelineMilestones(), [])
   const forecasts = useMemo(() => getForecasts(), [])
   const recommendations = useMemo(() => getRecommendations(), [])
-  const heatmap = useMemo(() => getHeatmapMatrix(), [])
   const trendChartData = useMemo(() => getTrendChartData(), [])
 
   const chartSeries = useMemo(
@@ -258,41 +251,6 @@ export default function StrategicInsights() {
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-3">
-        <div className="rounded-[30px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_30px_80px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-6">
-          <p className="text-[0.7rem] uppercase tracking-[0.28em] text-slate-400">Biggest improvements</p>
-          <h3 className="mt-2 text-2xl font-semibold text-white">Top 5 gains</h3>
-          <div className="mt-5 space-y-4">
-            {biggestImprovements.map((item, index) => (
-              <div key={item.indicator} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">#{index + 1}</p>
-                  <p className="mt-1 text-sm font-medium text-white">{item.indicator}</p>
-                </div>
-                <span className="text-base font-semibold text-emerald-300">+{item.growth}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-[30px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_30px_80px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-6 xl:col-span-2">
-          <p className="text-[0.7rem] uppercase tracking-[0.28em] text-slate-400">Leadership attention</p>
-          <h3 className="mt-2 text-2xl font-semibold text-white">Needs attention</h3>
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {needsAttention.map((item) => (
-              <div key={item.indicator} className="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-medium text-white">{item.indicator}</p>
-                  <AlertTriangle className="h-4 w-4 text-amber-300" />
-                </div>
-                <p className="mt-2 text-sm text-amber-100/90">{item.narrative}</p>
-                <p className="mt-3 text-xs uppercase tracking-[0.2em] text-amber-200/90">Growth {item.growth}%</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="rounded-[30px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_30px_80px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-6">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -373,39 +331,6 @@ export default function StrategicInsights() {
           </div>
         </div>
 
-        <div className="rounded-[30px] border border-white/10 bg-slate-950/60 p-5 shadow-[0_30px_80px_rgba(15,23,42,0.24)] backdrop-blur-xl sm:p-6">
-          <p className="text-[0.7rem] uppercase tracking-[0.28em] text-slate-400">Heatmap</p>
-          <h3 className="mt-2 text-2xl font-semibold text-white">Historical indicator heatmap</h3>
-
-          <div className="mt-5 overflow-x-auto">
-            <div className="min-w-[540px]">
-              <div className="grid grid-cols-[180px_repeat(7,minmax(54px,1fr))] gap-2 text-xs uppercase tracking-[0.2em] text-slate-400">
-                <div />
-                {allYears.map((year) => (
-                  <div key={year} className="text-center">{year}</div>
-                ))}
-
-                {heatmap.map((row) => (
-                  <>
-                    <div key={`${row.indicator}-label`} className="flex items-center text-[10px] tracking-[0.15em] text-slate-300">{row.indicator}</div>
-                    {row.values.map((cell) => (
-                      <div
-                        key={`${row.indicator}-${cell.year}`}
-                        className={[
-                          'flex h-10 items-center justify-center rounded-lg border text-[10px] font-medium',
-                          cell.state === 'green' ? 'border-emerald-400/30 bg-emerald-500/20 text-emerald-200' : cell.state === 'yellow' ? 'border-amber-400/30 bg-amber-500/20 text-amber-200' : 'border-rose-400/30 bg-rose-500/20 text-rose-200',
-                        ].join(' ')}
-                        title={`${row.indicator} ${cell.year}: ${cell.delta}%`}
-                      >
-                        {cell.delta > 0 ? '+' : ''}{cell.delta}
-                      </div>
-                    ))}
-                  </>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.2fr_1.8fr]">
