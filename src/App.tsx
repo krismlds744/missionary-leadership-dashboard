@@ -1,6 +1,7 @@
 ﻿import { lazy, Suspense, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import { defaultAuthorizedRoute } from './lib/authorization'
 
 const MainLayout = lazy(() => import('./layouts/MainLayout'))
 const StakeOverview = lazy(() => import('./pages/StakeOverview'))
@@ -25,7 +26,7 @@ function RouteFallback() {
 }
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading, canAccessRoute } = useAuth()
+  const { isAuthenticated, isLoading, canAccessRoute, user } = useAuth()
   const location = useLocation()
 
   if (isLoading) {
@@ -37,7 +38,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   }
 
   if (!canAccessRoute(location.pathname)) {
-    return <Navigate to="/" replace />
+    return <Navigate to={defaultAuthorizedRoute(user)} replace />
   }
 
   return <>{children}</>

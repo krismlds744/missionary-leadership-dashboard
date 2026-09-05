@@ -1,13 +1,4 @@
-export type Role =
-  | 'Stake President'
-  | 'Stake Presidency Counselor'
-  | 'Stake Clerk'
-  | 'High Council'
-  | 'Bishop'
-  | 'Bishopric Counselor'
-  | 'Ward Clerk'
-  | 'Ward Mission Leader'
-  | 'Read-only Viewer'
+export type Role = 'stake_presidency' | 'ward'
 
 export type Permission =
   | 'dashboard'
@@ -26,8 +17,8 @@ export type User = {
   id: string
   name: string
   email: string
-  username: string
   role: Role
+  ward: string | null
   permissions: Permission[]
 }
 
@@ -75,4 +66,5 @@ export type AuthContextValue = {
   logout: () => void
   hasPermission: (permission: Permission) => boolean
   canAccessRoute: (path: string) => boolean
+  canAccessWard: (ward: string) => boolean
 }

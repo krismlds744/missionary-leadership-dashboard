@@ -38,7 +38,7 @@ export default function MainLayout() {
         <div className="relative flex min-h-screen min-w-0">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(148,163,184,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.10),transparent_22%)]" />
 
-          <aside className="relative z-10 hidden w-[280px] shrink-0 border-r border-white/10 bg-slate-950/70 backdrop-blur-xl md:block">
+          <aside className="relative z-10 hidden w-[280px] shrink-0 flex-col border-r border-white/10 bg-slate-950/70 backdrop-blur-xl md:flex">
             <div className="p-5 pb-0">
               <button
                 type="button"

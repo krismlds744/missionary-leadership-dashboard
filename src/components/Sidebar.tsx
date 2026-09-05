@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import { canAccessTab } from '../lib/authorization'
 
 const navItems: Array<{ label: string; path: string; icon: LucideIcon; permission: string }> = [
   { label: 'Stake Overview', path: '/', icon: Grid, permission: 'stakeOverview' },
@@ -46,12 +47,8 @@ function SidebarItem({ label, path, icon: Icon, onNavigate }: { label: string; p
 
 export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuth()
-  const visibleItems = navItems.filter((item) => user?.permissions.includes(item.permission as never))
-  const accountLabel = user?.username === 'krislds744'
-    ? 'Admin'
-    : user?.role === 'Stake President'
-      ? 'President'
-      : user?.role
+  const visibleItems = navItems.filter((item) => canAccessTab(user, item.permission as never))
+  const accountLabel = user?.role === 'stake_presidency' ? 'Stake Presidency' : user?.ward ?? 'Ward'
 
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-between overflow-y-auto p-5">

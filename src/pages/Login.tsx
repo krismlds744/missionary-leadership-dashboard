@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { Eye, EyeOff, KeyRound, Lock, ShieldCheck } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { defaultAuthorizedRoute } from '../lib/authorization'
 
 export default function Login() {
-  const { login, isAuthenticated } = useAuth()
+  const { login, isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [form, setForm] = useState({ username: '', password: '', rememberMe: true })
@@ -17,9 +18,9 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(redirectPath, { replace: true })
+      navigate(user?.role === 'ward' ? defaultAuthorizedRoute(user) : redirectPath, { replace: true })
     }
-  }, [isAuthenticated, navigate, redirectPath])
+  }, [isAuthenticated, navigate, redirectPath, user])
 
   const validate = () => {
     const nextErrors: { username?: string; password?: string } = {}
@@ -49,13 +50,13 @@ export default function Login() {
     setIsSubmitting(true)
 
     try {
-      await login({
+      const authorizedUser = await login({
         username: form.username,
         password: form.password,
         rememberMe: form.rememberMe,
       })
 
-      navigate(redirectPath, { replace: true })
+      navigate(authorizedUser.role === 'ward' ? defaultAuthorizedRoute(authorizedUser) : redirectPath, { replace: true })
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Unable to sign in.')
     } finally {
@@ -101,7 +102,7 @@ export default function Login() {
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               <div className="space-y-2">
                 <label htmlFor="username" className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  Username or email
+                  Email
                 </label>
                 <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)]">
                   <KeyRound className="h-4 w-4 text-slate-400" />
@@ -111,7 +112,7 @@ export default function Login() {
                     value={form.username}
                     onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
                     className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 focus:outline-none"
-                    placeholder="Enter username or email"
+                    placeholder="Enter email"
                   />
                 </div>
                 {errors.username && <p className="text-xs text-rose-300">{errors.username}</p>}

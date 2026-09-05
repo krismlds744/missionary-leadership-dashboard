@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Command, CornerDownLeft, Pin, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { canAccessTab } from '../../lib/authorization'
+import { routePermissionMap } from '../../types/auth'
 import { defaultFavorites, recentSearches, searchItems } from '../../data/search'
 import Favorites from './Favorites'
 import RecentSearches from './RecentSearches'
@@ -15,7 +17,7 @@ interface CommandPaletteProps {
 
 export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [favorites, setFavorites] = useState(defaultFavorites)
@@ -26,14 +28,15 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     const normalized = query.trim().toLowerCase()
 
     if (!normalized) {
-      return searchItems.slice(0, 8)
+      return searchItems.filter((item) => !routePermissionMap[item.path] || canAccessTab(user, routePermissionMap[item.path])).slice(0, 8)
     }
 
     return searchItems.filter((item) => {
+      if (routePermissionMap[item.path] && !canAccessTab(user, routePermissionMap[item.path])) return false
       const haystack = `${item.label} ${item.page} ${item.section} ${item.description} ${item.keywords.join(' ')}`.toLowerCase()
       return haystack.includes(normalized)
     })
-  }, [query])
+  }, [query, user])
 
   useEffect(() => {
     setSelectedIndex(0)
@@ -141,6 +144,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     return null
   }
 
+  const canNavigateTo = (path: string) => !routePermissionMap[path] || canAccessTab(user, routePermissionMap[path])
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 p-4 pt-16 backdrop-blur-2xl">
       <div className="w-full max-w-3xl rounded-[32px] border border-white/10 bg-slate-950/80 shadow-[0_35px_100px_rgba(15,23,42,0.6)] ring-1 ring-white/5 animate-[fadeIn_0.2s_ease-out]">
@@ -209,7 +214,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
                 <div className="space-y-2">
                   {searchItems
-                    .filter((item) => item.category === 'Quick Action')
+                    .filter((item) => item.category === 'Quick Action' && canNavigateTo(item.path))
                     .slice(0, 6)
                     .map((item) => (
                       <button
@@ -225,8 +230,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 </div>
               </div>
 
-              <RecentSearches items={recent} onSelect={handleSelect} />
-              <Favorites items={favorites} onSelect={handleSelect} />
+              <RecentSearches items={recent.filter((item) => canNavigateTo(item.path))} onSelect={handleSelect} />
+              <Favorites items={favorites.filter((item) => canNavigateTo(item.path))} onSelect={handleSelect} />
             </div>
           </div>
         </div>

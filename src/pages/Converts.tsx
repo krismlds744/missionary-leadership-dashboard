@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowUpRight,
   BadgeCheck,
@@ -9,8 +9,10 @@ import {
   X,
 } from 'lucide-react'
 import NewConvertRetentionByWard from '../components/retention/NewConvertRetentionByWard'
+import InactiveConvertsDialog from '../components/converts/InactiveConvertsDialog'
 import SummaryCard from '../components/stake-overview/SummaryCard'
 import { convertsData } from '../data/converts'
+import { supabase } from '../lib/supabase'
 
 const summaryIcons = [Users, Waves, HeartHandshake, UserRoundCheck, BadgeCheck, ArrowUpRight, BadgeCheck] as const
 
@@ -23,20 +25,35 @@ function PriesthoodProgress({ value }: { value: string }) {
 
 export default function Converts() {
   const [showPriesthoodModal, setShowPriesthoodModal] = useState(false)
+  const [showInactiveModal, setShowInactiveModal] = useState(false)
+  const [inactiveConverts, setInactiveConverts] = useState<Array<{ id: string; name: string; ward: string }>>([])
+  const [inactiveLoadError, setInactiveLoadError] = useState('')
   const totalNewConverts = convertsData.summary.totalConverts
   const activeConverts = Math.round(totalNewConverts * 0.73)
-  const inactiveConverts = Math.max(totalNewConverts - activeConverts, 0)
+
+  useEffect(() => {
+    let isMounted = true
+    supabase.from('converts').select('id, name, ward').eq('attended_sacrament_last_month', false).order('ward').order('name').then(({ data, error }) => {
+      if (!isMounted) return
+      if (error) {
+        setInactiveLoadError('Inactive recent convert attendance data is unavailable. Run the Supabase attendance migration, then refresh this page.')
+        return
+      }
+      setInactiveConverts(data ?? [])
+    })
+    return () => { isMounted = false }
+  }, [])
 
   const summaryCards = useMemo(
     () => [
       { label: 'Total New Converts', value: totalNewConverts.toLocaleString(), delta: 'Verified by official PDF', icon: summaryIcons[0] },
       { label: 'Active New Converts', value: activeConverts.toLocaleString(), delta: 'Currently active in the report', icon: summaryIcons[1] },
-      { label: 'Inactive New Converts', value: inactiveConverts.toLocaleString(), delta: 'Needs follow-up focus', icon: summaryIcons[2] },
+      { label: 'Inactive New Converts', value: inactiveConverts.length.toLocaleString(), delta: 'Did not attend sacrament last month', icon: summaryIcons[2], clickable: true, inactive: true },
       { label: 'New Converts with Calling', value: `${convertsData.summary.callingAssignmentRate}%`, delta: '20 of 86 eligible converts with calling or responsibility', icon: summaryIcons[3], compactDelta: true },
       { label: 'New Converts: Family History & Temple', value: '16 out of 86', delta: 'Converts age 12 and older who have submitted ancestor names for temple ordinances', icon: summaryIcons[4] },
       { label: 'Priesthood Ordination', value: '20 out of 35', delta: 'Youth and adult male converts ordained to appropriate priesthood office', icon: summaryIcons[5], clickable: true },
     ],
-    [activeConverts, inactiveConverts, totalNewConverts],
+    [activeConverts, inactiveConverts.length, totalNewConverts],
   )
 
   return (
@@ -57,13 +74,16 @@ export default function Converts() {
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-6">
         {summaryCards.map((card) => (
           <div key={card.label} className="h-full xl:col-span-2">
-            {card.clickable ? <button type="button" onClick={() => setShowPriesthoodModal(true)} className="h-full w-full text-left"><SummaryCard label={card.label} value={card.value} delta={card.delta} icon={card.icon} compactDelta={card.compactDelta} labelClassName="text-sky-300" /></button> : <SummaryCard label={card.label} value={card.value} delta={card.delta} icon={card.icon} compactDelta={card.compactDelta} labelClassName="text-sky-300" />}
+            {card.clickable ? <button type="button" onClick={() => card.inactive ? setShowInactiveModal(true) : setShowPriesthoodModal(true)} className="h-full w-full cursor-pointer text-left transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-cyan-300/50"><SummaryCard label={card.label} value={card.value} delta={card.delta} icon={card.icon} compactDelta={card.compactDelta} labelClassName="text-sky-300" /></button> : <SummaryCard label={card.label} value={card.value} delta={card.delta} icon={card.icon} compactDelta={card.compactDelta} labelClassName="text-sky-300" />}
           </div>
         ))}
       </section>
 
+      {inactiveLoadError && <p className="rounded-xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{inactiveLoadError}</p>}
+
       <NewConvertRetentionByWard />
 
+      {showInactiveModal && <InactiveConvertsDialog converts={inactiveConverts} onClose={() => setShowInactiveModal(false)} />}
       {showPriesthoodModal && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"><div className="w-full max-w-xl rounded-[28px] border border-white/10 bg-[#0b1020] p-6 shadow-2xl"><div className="mb-5 flex items-start justify-between gap-4"><div><p className="text-[0.65rem] uppercase tracking-[0.22em] text-sky-300/70">Priesthood Ordination</p><h2 className="mt-1 text-2xl font-semibold text-white">Ward breakdown</h2></div><button type="button" onClick={() => setShowPriesthoodModal(false)} className="rounded-xl p-2 text-slate-400 hover:bg-white/10 hover:text-white" aria-label="Close priesthood ordination breakdown"><X className="h-5 w-5" /></button></div><table className="w-full text-left"><thead><tr className="border-b border-white/10 text-xs uppercase tracking-[0.16em] text-slate-500"><th className="px-3 py-3">Ward</th><th className="px-3 py-3 text-center">Ordained / Eligible</th></tr></thead><tbody>{[['Bagong Silangan', '1/6'], ['Batasan Hills 1st', '4/6'], ['Batasan Hills 2nd', '2/5'], ['Don Antonio', '3/5'], ['Fairview', '5/7'], ['Kalayaan', '3/3'], ['Mapayapa', '2/3']].map(([ward, value]) => <tr key={ward} className="border-b border-white/7 text-sm"><td className="px-3 py-3 font-medium text-white">{ward}</td><td className="px-3 py-3"><PriesthoodProgress value={value} /></td></tr>)}</tbody></table></div></div>}
     </div>
   )
